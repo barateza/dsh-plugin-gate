@@ -1,0 +1,87 @@
+# dsh-plugin-gate
+
+**Installation safety gate for DeepSeek Harness plugins — an antivirus-style review step before you run `dsh plugin add`.**
+
+The plugin marketplace is growing fast (thousands of entries), and malicious code mixed into a plugin is only a matter of time. `dsh-plugin-gate` gives the agent a `gate_scan` tool that inspects a plugin source — a **local directory** or an **npm tarball** — for the classic malware shapes:
+
+| Domain | What it checks |
+|---|---|
+| **Scripts** | npm lifecycle scripts (pre/install/postinstall), exec/spawn/shell:true, curl|sh, encoded PowerShell, cmd/WSH launch, dynamic require |
+| **Obfuscation** | eval / new Function / vm.runIn*, hex-escape floods, base64 blobs, char-array packing |
+| **Permissions** | credential env reads (`OPENAI_API_KEY` etc.), ssh/aws/npmrc file reads, writes to system/home/dotfile paths, chmod 777, sandbox-escalation requests |
+| **Network** | external URLs & hosts, fetch/axios/socket/WebSocket/DNS APIs, cloud-metadata endpoints (169.254.169.254), Discord/Telegram/Slack webhooks, .onion, read-then-send exfiltration shape |
+| **Secrets** | hardcoded `sk-` keys, `ghp_` tokens, AWS keys, private key blocks, bearer tokens |
+
+The gate is **read-only**: it never executes scanned code and never writes files.
+
+## Install
+
+In your DSH profile:
+
+```bash
+dsh plugin --profile <profile> add dsh-plugin-gate
+# or add the bundle patch manually:
+#   dsh --profile <profile> --patch ./node_modules/dsh-plugin-gate/cordis.patch.yml
+```
+
+## Usage
+
+Ask the agent to scan a plugin before installing it (the plugin also injects prompt guidance that tells the agent to do this automatically):
+
+```
+gate_scan target: "npm:dsh-plugin-some-package"
+gate_scan target: "npm:dsh-plugin-some-package@1.2.3"   # pinned version
+gate_scan target: "./downloaded-plugin"                 # local directory
+```
+
+Result shape:
+
+```json
+{
+  "verdict": "BLOCK" | "WARN" | "PASS",
+  "score": 254,
+  "summary": { "high": 0, "medium": 1, "low": 3, "categories": { "network": 4 } },
+  "network": { "hosts": [...], "unallowlisted": [...], "readAndSendFiles": [...] },
+  "hits": [{ "rule": "fetch_call", "category": "network", "severity": "medium",
+             "file": "lib/index.js", "line": 12, "evidence": "...", "hint": "..." }],
+  "recommendations": [...]
+}
+```
+
+### Verdict semantics
+
+- **BLOCK** — at least one high-severity signature. Do not install until the maintainer ships a clean rebuild you can scan again.
+- **WARN** — medium-severity patterns that need manual review (network I/O, home-path writes, base64 blobs). Inspect every hit in context.
+- **PASS** — no risky signatures. Heuristic only — keep normal caution with unknown maintainers.
+
+Context-aware rules: `exec()`/`execSync()` hits are downgraded when the file does not import `child_process` (typical `RegExp#exec` false positive).
+
+## Configuration
+
+| Key | Default | Meaning |
+|---|---|---|
+| `maxFiles` | 1000 | hard cap on scanned files per directory walk |
+| `maxFileBytes` | 2 MiB | per-file text cap |
+| `includeNodeModules` | false | descend into node_modules |
+| `maxTarballBytes` | 32 MiB | npm tarball download cap |
+| `allowlistHosts` | [] | hosts never listed as unallowlisted |
+| `promptSection` | true | inject agent guidance |
+| `sectionOrder` | 5 | prompt section order |
+
+## Development
+
+```bash
+node --check lib/*.js
+node test/rules.test.mjs   # main-module mode (node --test is blocked in the DSH sandbox)
+node test/scan.test.mjs
+```
+
+Pure logic lives in `lib/rules.js` (signatures), `lib/targz.js` (in-memory tar.gz), `lib/scan.js` (orchestration + verdict). The Cordis plugin is `lib/index.js`.
+
+## Security
+
+The gate never executes scanned content. It is a heuristic signature scanner — it can miss novel malware and over-flag innocent code. Review BLOCK/WARN hits yourself; see [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT
