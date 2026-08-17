@@ -11,6 +11,7 @@
 | **权限** | 读取凭据环境变量（OPENAI_API_KEY 等）、读取 ssh/aws/npmrc 文件、写入系统/家目录/点文件、chmod 777、沙箱权限升级请求 |
 | **网络** | 外部 URL 与主机、fetch/axios/socket/WebSocket/DNS API、云元数据端点（169.254.169.254）、Discord/Telegram/Slack webhook、.onion、读文件后外发的"窃取"形态 |
 | **密钥** | 硬编码 `sk-` 密钥、`ghp_` token、AWS key、私钥块、Bearer token |
+| **供应链** | 精确版本直接依赖对接 **Google OSV** 漏洞库核查（range 与官方 @deepseek-ai 包跳过；可配置，离线静默降级） |
 
 闸门**只读**：绝不执行被扫描的代码，绝不写文件。
 
@@ -47,6 +48,9 @@ gate_scan target: "./downloaded-plugin"                 # 本地目录
 | `includeNodeModules` | false | 是否进入 node_modules |
 | `maxTarballBytes` | 32 MiB | npm tarball 下载上限 |
 | `allowlistHosts` | [] | 白名单主机（不出现在未白名单列表） |
+| `osvCheck` | true | 对接 Google OSV 查询精确版本依赖的已知漏洞 |
+| `osvMaxDeps` | 8 | 最多检查的精确版本直接依赖数 |
+| `osvTimeoutMs` | 10000 | 单个依赖 OSV 查询超时 |
 | `promptSection` | true | 注入 agent 使用指引 |
 | `sectionOrder` | 5 | 提示词区块顺序 |
 

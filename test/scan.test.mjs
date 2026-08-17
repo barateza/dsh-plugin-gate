@@ -165,6 +165,25 @@ test("minified lines are flagged low", () => {
   assert.equal(ml.line, 2);
 });
 
+test("scanDirectory queries OSV when enabled and skips when disabled", async () => {
+  const root = tmpdir("gate-osv-");
+  writeTree(root, {
+    "package.json": JSON.stringify({
+      name: "demo",
+      dependencies: { "vuln-dep": "1.0.0", "ranged": "^2.0.0", "@deepseek-ai/cordis": "^4.0.1" },
+    }),
+  });
+  const adapter = makeFsAdapter(root);
+  const osvFetch = async () => ({ ok: true, json: async () => ({ vulns: [{ id: "GHSA-demo", summary: "demo vuln" }] }) });
+  const on = await scanDirectory(adapter, root, { osvCheck: true, fetchImpl: osvFetch });
+  const hit = on.hits.find((h) => h.rule === "osv_vulnerability");
+  assert.ok(hit, "osv hit expected");
+  assert.equal(hit.evidence.split(" ")[0], "vuln-dep@1.0.0");
+  assert.ok(!on.hits.some((h) => h.rule === "osv_vulnerability" && h.evidence.includes("ranged")), "range deps skipped");
+  const off = await scanDirectory(adapter, root, { osvCheck: false });
+  assert.ok(!off.hits.some((h) => h.rule === "osv_vulnerability"));
+});
+
 test("scanFileText flags lifecycle scripts and exfil shape", () => {
   const res = scanFileText({
     rel: "package.json",

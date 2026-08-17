@@ -11,6 +11,7 @@ The plugin marketplace is growing fast (thousands of entries), and malicious cod
 | **Permissions** | credential env reads (`OPENAI_API_KEY` etc.), ssh/aws/npmrc file reads, writes to system/home/dotfile paths, chmod 777, sandbox-escalation requests |
 | **Network** | external URLs & hosts, fetch/axios/socket/WebSocket/DNS APIs, cloud-metadata endpoints (169.254.169.254), Discord/Telegram/Slack webhooks, .onion, read-then-send exfiltration shape |
 | **Secrets** | hardcoded `sk-` keys, `ghp_` tokens, AWS keys, private key blocks, bearer tokens |
+| **Supply chain** | exact-version direct dependencies checked against **Google OSV** (ranges and official @deepseek-ai packages skipped; configurable, offline-degrades) |
 
 The gate is **read-only**: it never executes scanned code and never writes files.
 
@@ -65,6 +66,9 @@ Context-aware rules: `exec()`/`execSync()` hits are downgraded when the file doe
 | `includeNodeModules` | false | descend into node_modules |
 | `maxTarballBytes` | 32 MiB | npm tarball download cap |
 | `allowlistHosts` | [] | hosts never listed as unallowlisted |
+| `osvCheck` | true | query Google OSV for known vulnerabilities on exact-version deps |
+| `osvMaxDeps` | 8 | max exact-version direct deps checked |
+| `osvTimeoutMs` | 10000 | per-dep OSV query timeout |
 | `promptSection` | true | inject agent guidance |
 | `sectionOrder` | 5 | prompt section order |
 
