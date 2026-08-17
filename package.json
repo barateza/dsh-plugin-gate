@@ -1,0 +1,63 @@
+{
+  "name": "dsh-plugin-gate",
+  "version": "1.0.0",
+  "description": "Installation safety gate for DeepSeek Harness plugins: an antivirus-style scanner that inspects a plugin source (local directory or npm tarball) for malicious install scripts, dangerous permissions/fs usage, secret exfiltration, and network callbacks before you run 'dsh plugin add'",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./rules": "./lib/rules.js",
+    "./scan": "./lib/scan.js",
+    "./targz": "./lib/targz.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "test": "node --test test/",
+    "prepublishOnly": "node --test test/"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "plugin",
+    "security",
+    "scan",
+    "audit",
+    "malware",
+    "supply-chain",
+    "gate",
+    "safety"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-fs": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-system-prompt": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/863683348/dsh-plugin-gate.git"
+  },
+  "homepage": "https://github.com/863683348/dsh-plugin-gate#readme",
+  "bugs": {
+    "url": "https://github.com/863683348/dsh-plugin-gate/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
