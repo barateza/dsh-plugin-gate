@@ -36,7 +36,7 @@ gate_scan target: "./downloaded-plugin"                 # 本地目录
 - **WARN**：中等风险特征需人工复核（网络 I/O、家目录写入、base64 大块）。逐条看证据再决定。
 - **PASS**：未发现风险签名。仅为启发式结果，对陌生作者仍需保持警惕。
 
-上下文感知：文件未 import `child_process` 时，`exec()`/正则 `RegExp#exec` 命中会被降级，减少误报。
+上下文感知：文件未 import `child_process` 时，`exec()`/正则 `RegExp#exec` 命中会被降级，减少误报；代码执行类规则（exec、eval、curl|sh、PowerShell…）出现在**注释或文档**中时自动降为 low（示例而非行为），而密钥与 webhook 即使在注释中仍保持高警示。依赖从 git/http/file 安装会标记为 `risky_dependency`，超 4000 字符的压缩单行标记为 `minified_line`（low）。
 
 ## 配置
 

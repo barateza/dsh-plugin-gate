@@ -54,7 +54,7 @@ Result shape:
 - **WARN** — medium-severity patterns that need manual review (network I/O, home-path writes, base64 blobs). Inspect every hit in context.
 - **PASS** — no risky signatures. Heuristic only — keep normal caution with unknown maintainers.
 
-Context-aware rules: `exec()`/`execSync()` hits are downgraded when the file does not import `child_process` (typical `RegExp#exec` false positive).
+Context-aware rules: `exec()`/`execSync()` hits are downgraded when the file does not import `child_process` (typical `RegExp#exec` false positive); code-context rules (exec, eval, curl|sh, PowerShell…) are downgraded to low when found in **comments or documentation** (examples, not behavior) — while secrets and webhooks stay flagged even in comments. Dependencies installed from git/http/file URLs are flagged as `risky_dependency`, and >4000-char minified lines as `minified_line` (low).
 
 ## Configuration
 

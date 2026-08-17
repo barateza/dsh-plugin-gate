@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-gate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Installation safety gate for DeepSeek Harness plugins: an antivirus-style scanner that inspects a plugin source (local directory or npm tarball) for malicious install scripts, dangerous permissions/fs usage, secret exfiltration, and network callbacks before you run 'dsh plugin add'",
   "type": "module",
   "main": "lib/index.js",
