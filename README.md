@@ -1,6 +1,6 @@
 # dsh-plugin-gate
 
-**Installation safety gate for DeepSeek Harness plugins — an antivirus-style review step before you run `dsh plugin add`.**
+**Installation safety gate & data-protection guard for DeepSeek Harness — 49 static signature rules (22 high / 23 medium / 4 low) scan plugin sources for malicious install scripts, credential theft, obfuscation and network callbacks before you run `dsh plugin add`, and 12 destructive-command patterns plus workspace-boundary checks stop `rm -rf`-class accidents before they happen.**
 
 The plugin marketplace is growing fast (thousands of entries), and malicious code mixed into a plugin is only a matter of time. `dsh-plugin-gate` gives the agent a `gate_scan` tool that inspects a plugin source — a **local directory** or an **npm tarball** — for the classic malware shapes:
 
