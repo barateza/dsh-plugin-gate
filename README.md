@@ -35,6 +35,17 @@ gate_scan target: "npm:dsh-plugin-some-package@1.2.3"   # pinned version
 gate_scan target: "./downloaded-plugin"                 # local directory
 ```
 
+### v1.1 - Data-protection guard
+
+Before any destructive operation, ask the agent to evaluate it with gate_guard (also injected into prompt guidance):
+
+    gate_guard command: "rm -rf ./node_modules"
+    gate_guard path: ".dsh-memory-setup/memory.json" action: "delete"
+
+- **BLOCK** - device/root-level destruction (rm -rf /, rmdir /s /q, format, dd to a block device, mkfs, drive-root deletes): refuse.
+- **WARN** - recursive/force deletes, targets outside the workspace, or critical files (memory.json, .git, ...): confirm the exact target first.
+- **PASS** - no destructive signature detected.
+
 Result shape:
 
 ```json
