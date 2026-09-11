@@ -15,6 +15,10 @@ The plugin marketplace is growing fast (thousands of entries), and malicious cod
 
 The gate is **read-only**: it never executes scanned code and never writes files.
 
+## Compatibility
+
+Tool schemas are validated against the `@deepseek-ai/dsh-tools` value-schema DSL (compiled at plugin load). 1.3.1 fixes a schema violation that made the host abort the whole profile boot on DSH ≥ 0.1.0-rc.6 with `unsupported JSON schema: schema.required is not supported by the value schema DSL`. If you installed an affected version and your DSH no longer starts, upgrade to 1.3.1 (or remove the plugin from the profile) — no data is lost.
+
 ## Install
 
 In your DSH profile:
