@@ -35,6 +35,20 @@ gate_scan target: "npm:dsh-plugin-some-package@1.2.3"   # pinned version
 gate_scan target: "./downloaded-plugin"                 # local directory
 ```
 
+### v1.3 - Baselines & reports
+
+After a fix, prove the risk is gone — and that nothing new appeared:
+
+    gate_diff target: "npm:dsh-plugin-some-package"          # new / resolved / changed / unchanged vs the stored baseline
+    gate_diff target: "./downloaded-plugin" update: true     # store this scan as the new baseline
+
+Findings are fingerprinted by **rule + severity + file** (line shifts do not create false "new" entries). The baseline lives at `.dsh/gate-baseline.json` inside the session workspace.
+
+Attach evidence to a ticket, PR or CI job:
+
+    gate_report target: "npm:dsh-plugin-some-package"                       # Markdown report
+    gate_report target: "./plugin" format: "json" write: true               # JSON report written to .dsh/gate-report.json
+
 ### v1.1 - Data-protection guard
 
 Before any destructive operation, ask the agent to evaluate it with gate_guard (also injected into prompt guidance):
@@ -100,3 +114,8 @@ The gate never executes scanned content. It is a heuristic signature scanner —
 ## License
 
 MIT
+
+
+## Roadmap
+
+See [ROADMAP.md](./ROADMAP.md) — next five versions (v1.3.0 – v1.7.0): baselines & reports, configurable rules, pre-install interception, dependency SBOM, team policy & CI.
