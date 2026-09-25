@@ -20,8 +20,8 @@
     "ROADMAP.md"
   ],
   "scripts": {
-    "test": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs",
-    "prepublishOnly": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs"
+    "test": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs && node test/gate-report.test.mjs",
+    "prepublishOnly": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs && node test/gate-report.test.mjs"
   },
   "keywords": [
     "deepseek-harness",
