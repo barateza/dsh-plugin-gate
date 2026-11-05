@@ -15,10 +15,12 @@ All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate
 
 ### Release engineering
 
-- First release published by CI through npm **trusted publishing** (OIDC), with a provenance
-  statement: no npm token exists anywhere. 1.3.3 had been bootstrapped with `npm stage publish`
-  plus a manual approval, because a trusted publisher cannot be attached to a package that does
-  not exist yet.
+- First release submitted by CI through npm **trusted publishing** (OIDC): no npm token exists
+  in this repository or anywhere else. The trusted publisher is scoped to **staged publishing
+  only**, so CI stages the version and a maintainer approves it on npmjs.com with a security
+  key — proof-of-presence stays with a human. 1.3.3 had been bootstrapped the same way
+  (`npm stage publish` + manual approval), because a trusted publisher cannot be attached to a
+  package that does not exist yet.
 
 ## 1.3.3 — 2026-11-05
 

@@ -10,7 +10,13 @@ name: publish
 # the `id-token: write` permission. The package must already exist — the first
 # release (1.3.3) was bootstrapped with `npm stage publish` plus a manual
 # approval, because a trusted publisher cannot be configured for a package that
-# does not exist yet. Every release after that needs no credential at all.
+# does not exist yet.
+#
+# This repository's trusted publisher is configured for STAGED PUBLISH ONLY
+# (`npm publish` is deliberately NOT granted). CI therefore submits the version
+# to the staging area and a maintainer approves it on npmjs.com with a security
+# key: proof-of-presence stays with a human, while no token exists anywhere.
+# `npm stage publish` is always allowed by a trusted publisher.
 
 on:
   push:
@@ -41,4 +47,4 @@ jobs:
 
       - run: npm test
 
-      - run: npm publish --access public --provenance
+      - run: npm stage publish --access public --provenance
