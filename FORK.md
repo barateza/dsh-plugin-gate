@@ -37,7 +37,8 @@ Two of those defects made the safety features inert:
   range **instead of** peer ranges. Upstream pinned `@deepseek-ai/dsh-*` peers at
   `^0.1.0-rc.6`, so every 0.2.x install needed a manual, per-version exemption
   (`compatibility.json`) granted with `dsh plugin allow-version`. This fork installs on the
-  tested 0.2.x line without an exemption.
+  tested 0.2.x line without an exemption, and its DSH host peers declare the same window (see
+  `fix(peers)` below).
 - Two regression tests (`test/gate-guard.test.mjs`, `test/gate-report.test.mjs`) that assert the
   parameter/result contract, not just tool presence.
 - `chore`: drop the stray `.npm-cache-pub3/` and `.npm-cache-pub4/` npm debug-log directories
@@ -53,12 +54,16 @@ Two of those defects made the safety features inert:
   `allowedTarballHosts` (default `registry.npmjs.org`), and loopback/link-local/private/CGNAT/
   multicast/ULA addresses are refused, including via a redirect. The URL comes from registry
   metadata, so this closes an SSRF surface in the npm-spec scan path.
-- `revert(peers)`: an attempt to widen the DSH peer ranges and mark them `optional` was backed
-  out. Optional peers stop `npm install` from fetching them, which broke the suite
-  (`lib/index.js` imports `@deepseek-ai/schemastery`), and npm's semver never matched the
-  `0.2.2-rc.1` prerelease against `>=0.1.0-rc.6 <0.3.0` anyway — it kept resolving `0.1.0-rc.8`.
-  Peers are upstream's; the two packages the entry imports are explicit devDependencies so a
-  clean checkout can run the tests. `engines.dsh` is the compatibility contract.
+- `fix(peers)`: the DSH host peers (`dsh-fs`, `dsh-system-prompt`, `dsh-tools`) mirror
+  `engines.dsh` (`>=0.2.0-rc.2 <0.3.0`) instead of upstream's `^0.1.0-rc.6`. The host loader
+  ignores peers once `engines.dsh` is declared, but the plugin market does not: `dshmarket`
+  intersects every DSH peer with the engine range, so the 0.1 range made it refuse the 1.3.8
+  update on a 0.2.2-rc.1 host (`>=0.2.0-rc.2 <0.3.0 ∩ ^0.1.0-rc.6`) even though the host
+  itself would have loaded the release. The 1.3.5 widening / optional-peer attempt and its
+  1.3.7 revert are recorded in the changelog; `test/peers.test.mjs` now keeps the two ranges
+  identical. The host packages the suite resolves (`dsh-tools`, `dsh-fs`,
+  `dsh-system-prompt`) are pinned exactly at the tested runtime, `0.2.2-rc.1`, so `npm install`
+  and `npm test` exercise the line the host actually ships.
 
 Everything else — rules, report renderer, roadmap — is upstream's, unchanged; the scanner
 gained only the self-scan cap and the tarball-URL check described above.

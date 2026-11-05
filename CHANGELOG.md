@@ -3,6 +3,45 @@
 All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate` 1.3.2
 (2026-09-11); entries below are relative to that release.
 
+## 1.3.9 — 2026-11-05
+
+### Fixed
+
+- **The plugin market refused to install 1.3.8 on a 0.2.2-rc.1 host, because the
+  `@deepseek-ai/dsh-*` peers still described the 0.1 line.** The host loader lets
+  `engines.dsh` decide alone, but the market (`dshmarket`) evaluates every DSH peer
+  *conjunctively* with it and displays the intersection it read:
+  `>=0.2.0-rc.2 <0.3.0 ∩ ^0.1.0-rc.6`. Since `^0.1.0-rc.6` stops below `0.2.0`, the market
+  computed `incompatible` and blocked the update, reporting that no installable version could be
+  looked up either (`Could not look up compatible versions.`). The host would have accepted the
+  same release; only the market refused it.
+
+  The three lockstep host peers (`dsh-fs`, `dsh-system-prompt`, `dsh-tools`) now declare the
+  engine window, `>=0.2.0-rc.2 <0.3.0`, which is also what the host provides: the 0.2.2-rc.1
+  installation ships those packages at 0.2.2-rc.1. Both evaluators pass npm's
+  `includePrerelease`, so that range does admit the `0.2.2-rc.1` prerelease. `cordis` (4.x) and
+  `schemastery` (3.x) are unchanged: host packages, but not on DSH's lockstep line.
+
+  This re-widens the peer ranges only; the optional-peer metadata stays reverted (it broke
+  `npm test`).
+
+### Changed
+
+- **The suite now runs against the runtime's own DSH packages.** `@deepseek-ai/dsh-tools` was
+  pinned at `^0.1.0-rc.6` while the plugin runs on 0.2.2-rc.1, so the tool-contract tests
+  exercised an API line the host no longer ships. It is pinned exactly at `0.2.2-rc.1`, together
+  with `dsh-fs` and `dsh-system-prompt`, which the peers require. A peer *range* cannot reach
+  that version: npm resolves `>=0.2.0-rc.2` to `0.2.0-rc.2` (its tuple is the only one a
+  prerelease comparator admits), and that release pulls a `cordis ~4.0.4` peer that conflicts
+  with the host's 4.1.0 tree (ERESOLVE). Pinning the three keeps `npm install` on the lockstep
+  line, so the tree the suite loads is the tree the host runs.
+
+### Added
+
+- `test/peers.test.mjs`: asserts every `@deepseek-ai/dsh*` peer mirrors `engines.dsh`, that the
+  DSH devDependencies are exact pins on that line, and — in place — why the two evaluators
+  disagree about peers. `npm test` and `prepublishOnly` run it.
+
 ## 1.3.8 — 2026-11-05
 
 ### CI
