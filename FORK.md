@@ -54,8 +54,13 @@ Two of those defects made the safety features inert:
   host packages `peerDependenciesMeta.optional` — the harness provides them at load time, so
   declaring them required only produced missing-peer warnings on install.
 
+- `fix(tarball-url)`: validate `dist.tarball` before fetching it — https only, host must be in
+  `allowedTarballHosts` (default `registry.npmjs.org`), and loopback/link-local/private/CGNAT/
+  multicast/ULA addresses are refused, including via a redirect. The URL comes from registry
+  metadata, so this closes an SSRF surface in the npm-spec scan path.
+
 Everything else — rules, report renderer, roadmap — is upstream's, unchanged; the scanner
-gained only the self-scan cap described above.
+gained only the self-scan cap and the tarball-URL check described above.
 
 ## Maintenance policy
 

@@ -350,6 +350,65 @@ test("scanNpmPackage resolves specs and rejects missing packages", async () => {
   assert.ok(result.network.unallowlisted.includes("evil.example"));
 });
 
+// ------------------------------------------------- tarball URL is not trusted
+/** Build a fetcher whose registry metadata advertises `tarball`, recording calls. */
+function registryAdvert(tarball) {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    calls.push(url);
+    if (url.endsWith(".tgz")) throw new Error("tarball fetch attempted: " + url);
+    return {
+      ok: true,
+      json: async () => ({
+        name: "evil-pkg",
+        "dist-tags": { latest: "1.0.0" },
+        versions: { "1.0.0": { name: "evil-pkg", version: "1.0.0", dist: { tarball } } },
+      }),
+    };
+  };
+  return { fetchImpl, calls };
+}
+
+test("scanNpmPackage refuses a non-https dist.tarball before fetching it", async () => {
+  const { fetchImpl, calls } = registryAdvert("http://registry.npmjs.org/evil-pkg/-/evil-pkg-1.0.0.tgz");
+  await assert.rejects(() => scanNpmPackage("evil-pkg", { fetchImpl }), /non-https/);
+  assert.equal(calls.filter((u) => u.endsWith(".tgz")).length, 0, "no tarball request may be made");
+});
+
+test("scanNpmPackage refuses a private or link-local dist.tarball", async () => {
+  for (const tarball of [
+    "https://169.254.169.254/latest/meta-data/iam/security-credentials/",
+    "https://127.0.0.1:8080/x.tgz",
+    "https://10.0.0.5/x.tgz",
+    "https://192.168.1.10/x.tgz",
+    "https://[::1]/x.tgz",
+    "https://localhost/x.tgz",
+  ]) {
+    const { fetchImpl, calls } = registryAdvert(tarball);
+    await assert.rejects(() => scanNpmPackage("evil-pkg", { fetchImpl }), /private-address|refusing/);
+    assert.equal(calls.filter((u) => u.endsWith(".tgz")).length, 0, "no tarball request for " + tarball);
+  }
+});
+
+test("scanNpmPackage refuses a dist.tarball on an unrelated public host", async () => {
+  const { fetchImpl } = registryAdvert("https://evil.example/payload.tgz");
+  await assert.rejects(() => scanNpmPackage("evil-pkg", { fetchImpl }), /refusing tarball host/);
+});
+
+test("scanNpmPackage honours an explicit allowedTarballHosts list", async () => {
+  const { fetchImpl, calls } = registryAdvert("https://mirror.internal.example/evil-pkg.tgz");
+  await assert.rejects(
+    () => scanNpmPackage("evil-pkg", { fetchImpl, allowedTarballHosts: ["registry.npmjs.org"] }),
+    /refusing tarball host/,
+  );
+  assert.equal(calls.filter((u) => u.endsWith(".tgz")).length, 0, "blocked before any request");
+  // Same URL becomes fetchable once its host is explicitly allowed.
+  await assert.rejects(
+    () => scanNpmPackage("evil-pkg", { fetchImpl, allowedTarballHosts: ["mirror.internal.example"] }),
+    /tarball fetch attempted/,
+  );
+});
+
 // ----------------------------------------------------------- tar extraction
 test("extractTarball roundtrips a real gzipped tar", async () => {
   const { gzipSync } = await import("node:zlib");

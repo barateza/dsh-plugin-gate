@@ -3,6 +3,26 @@
 All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate` 1.3.2
 (2026-09-11); entries below are relative to that release.
 
+## 1.3.6 — 2026-11-05
+
+### Security
+
+- **`dist.tarball` is no longer fetched unvalidated.** The registry returns the tarball URL as
+  package metadata, and `scanNpmPackage` previously fetched whatever it named. A malicious
+  package — or a compromised or misconfigured mirror — could therefore point a scan at an
+  internal host (`169.254.169.254`, `127.0.0.1`, a private network) and make the gate issue the
+  request on its behalf. A low-grade SSRF surface, and an odd one for a security tool to carry.
+
+  `assertSafeTarballUrl` now runs before any request: **https only**, the host must be in
+  `allowedTarballHosts` (default `["registry.npmjs.org"]`), and loopback, link-local,
+  private-range, CGNAT, multicast and unique-local IPv6 addresses are refused outright. A
+  redirect whose final URL lands on a private address is refused too. The rejection names the
+  package, version and reason instead of a generic download error.
+
+  `allowedTarballHosts` is a scan option, not plugin config, so a mirror can be permitted
+  deliberately. Private-registry scanning still does not work — the metadata lookup is pinned to
+  `registry.npmjs.org` — and is tracked separately rather than silently half-enabled.
+
 ## 1.3.5 — 2026-11-05
 
 ### Fixed
