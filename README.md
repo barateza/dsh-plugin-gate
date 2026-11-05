@@ -43,7 +43,9 @@ gate_scan target: "./downloaded-plugin"                 # local directory
 
 ### Scanning the gate itself
 
-`gate_scan` on this package returns **BLOCK**, and that is expected: `lib/rules.js` *is* the signature catalogue, so every pattern it hunts for (reverse shells, encoded PowerShell, `curl|sh`, `eval`) appears in it as a regular expression, and the scanner cannot tell a pattern definition from a pattern use. This package never executes scanned code, never spawns a shell, and its only outbound request is the optional OSV lookup at `api.osv.dev` performed by the supply-chain check.
+`gate_scan` on this package returns **WARN**, not **BLOCK**, and that is deliberate: `lib/rules.js` *is* the signature catalogue, so every pattern it hunts for (reverse shells, encoded PowerShell, `curl|sh`, `eval`) appears in it as a regular expression, and the scanner cannot tell a pattern definition from a pattern use.
+
+Because the target's package name is the gate's own (`dsh-plugin-gate` or `@barateza/dsh-plugin-gate`), the verdict is capped at **WARN** and the result carries `selfScan: true`. Every finding stays visible for a human, but automation is never told to refuse the gate itself. The cap is keyed on the package name, which only the gate can publish — the same bytes under any other package name still return **BLOCK**. This package never executes scanned code, never spawns a shell, and its only outbound request is the optional OSV lookup at `api.osv.dev` performed by the supply-chain check.
 
 ### v1.3 - Baselines & reports
 

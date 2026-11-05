@@ -44,7 +44,18 @@ Two of those defects made the safety features inert:
   that upstream tracked, and stop tracking `package-lock.json` (CI keeps `npm install`, per
   PR #8, since neither lockfile was previously committed).
 
-Everything else — rules, scanner, report renderer, roadmap — is upstream's, unchanged.
+- `fix(self-scan)`: cap the verdict at **WARN** when the scanned package is the gate itself
+  (`dsh-plugin-gate` / `@barateza/dsh-plugin-gate`) and set `selfScan: true`. The catalogue in
+  `lib/rules.js` necessarily matches its own rules, so the previous BLOCK told every agent
+  following the gate's guidance to refuse the gate. Findings stay visible; the same content
+  under any other package name still BLOCKs.
+- `chore(peers)`: widen `@deepseek-ai/dsh-fs`, `@deepseek-ai/dsh-system-prompt` and
+  `@deepseek-ai/dsh-tools` from `^0.1.0-rc.6` to `>=0.1.0-rc.6 <0.3.0`, and mark the five DSH
+  host packages `peerDependenciesMeta.optional` — the harness provides them at load time, so
+  declaring them required only produced missing-peer warnings on install.
+
+Everything else — rules, report renderer, roadmap — is upstream's, unchanged; the scanner
+gained only the self-scan cap described above.
 
 ## Maintenance policy
 

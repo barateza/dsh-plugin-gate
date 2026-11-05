@@ -35,7 +35,9 @@ gate_scan target: "./downloaded-plugin"                 # 本地目录
 
 ### 扫描本插件自身
 
-对本包运行 `gate_scan` 会返回 **BLOCK**，这是预期行为：`lib/rules.js` 本身就是签名库，它要查找的每一种模式（反弹 shell、编码 PowerShell、`curl|sh`、`eval`）都以正则形式存在于其中，扫描器无法区分「模式定义」与「模式使用」。本插件绝不执行被扫描代码、不启动 shell；唯一的出站请求是供应链检查启用时对 `api.osv.dev` 的查询。
+对本包运行 `gate_scan` 会返回 **WARN** 而非 **BLOCK**，这是刻意的：`lib/rules.js` 本身就是签名库，它要查找的每一种模式（反弹 shell、编码 PowerShell、`curl|sh`、`eval`）都以正则形式存在于其中，扫描器无法区分「模式定义」与「模式使用」。
+
+当被扫描包的名称就是本插件自身（`dsh-plugin-gate` 或 `@barateza/dsh-plugin-gate`）时，判定会被上限压到 **WARN**，结果带上 `selfScan: true`。所有命中项仍然展示给人工复核，但自动化不会再被要求拒绝闸门本身。该上限以包名为准，而该名称只有本插件能发布——同样的内容换成任何其他包名仍返回 **BLOCK**。本插件绝不执行被扫描代码、不启动 shell；唯一的出站请求是供应链检查启用时对 `api.osv.dev` 的查询。
 
 ### 判定语义
 
