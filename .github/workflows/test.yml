@@ -21,4 +21,8 @@ jobs:
       # with EUSAGE without one. Switch back to `npm ci` once a lockfile is
       # tracked — it is stricter and faster.
       - run: npm install
-      - run: node --test test/
+      # `npm test` (the package script) rather than `node --test test/`: on the
+      # runner's Node 22 the directory argument was resolved as a module path
+      # ("Cannot find module .../test"), so the suite never ran. The script also
+      # lists the files explicitly, so a new test file cannot be silently missed.
+      - run: npm test
