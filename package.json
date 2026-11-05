@@ -1,6 +1,6 @@
 {
   "name": "@barateza/dsh-plugin-gate",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "description": "Unofficial maintained fork of dsh-plugin-gate. Installation safety gate & data-protection guard for DeepSeek Harness: 60 static signature rules scan plugin sources for malicious install scripts, credential theft, obfuscation and network callbacks before 'dsh plugin add', with scan baselines (gate_diff), structured reports (gate_report), 12 destructive-command patterns and workspace-boundary checks. Carries the gate_guard parameter fix and gate_report lossless-JSON fix that never landed upstream (dsh-plugin-gate/issues/5).",
   "type": "module",
   "main": "lib/index.js",

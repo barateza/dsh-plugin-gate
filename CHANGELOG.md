@@ -3,6 +3,19 @@
 All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate` 1.3.2
 (2026-09-11); entries below are relative to that release.
 
+## 1.3.8 — 2026-11-05
+
+### CI
+
+- `actions/checkout` and `actions/setup-node` bumped to **v6**. The v4 actions target Node 20, which
+  GitHub now forces onto Node 24 and annotates on every run as deprecated, and
+  `package-manager-cache` — used by the publish workflow to keep automatic caching off — is not a
+  valid input on v4 ("Unexpected input(s) …"). The `test` workflow now completes with no
+  annotations; the remaining `ubuntu-latest` → Ubuntu 26 notice is a runner-image migration note,
+  not an error.
+- Documentation-only version: this tag exists to exercise the updated `publish.yml` through trusted
+  publishing (OIDC staging) before the next real release.
+
 ## 1.3.7 — 2026-11-05
 
 _Tagged once as 1.3.6; that tag never published — CI failed on the peer-metadata regression below
