@@ -33,6 +33,10 @@ gate_scan target: "npm:dsh-plugin-some-package@1.2.3"   # 固定版本
 gate_scan target: "./downloaded-plugin"                 # 本地目录
 ```
 
+### 扫描本插件自身
+
+对本包运行 `gate_scan` 会返回 **BLOCK**，这是预期行为：`lib/rules.js` 本身就是签名库，它要查找的每一种模式（反弹 shell、编码 PowerShell、`curl|sh`、`eval`）都以正则形式存在于其中，扫描器无法区分「模式定义」与「模式使用」。本插件绝不执行被扫描代码、不启动 shell；唯一的出站请求是供应链检查启用时对 `api.osv.dev` 的查询。
+
 ### 判定语义
 
 - **BLOCK**：存在高危特征（安装期执行、编码 PowerShell、eval/Function、云元数据探测、webhook、私钥、读取凭据）。修复并重新扫描前不要安装。

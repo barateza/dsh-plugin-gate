@@ -41,6 +41,10 @@ gate_scan target: "npm:dsh-plugin-some-package@1.2.3"   # pinned version
 gate_scan target: "./downloaded-plugin"                 # local directory
 ```
 
+### Scanning the gate itself
+
+`gate_scan` on this package returns **BLOCK**, and that is expected: `lib/rules.js` *is* the signature catalogue, so every pattern it hunts for (reverse shells, encoded PowerShell, `curl|sh`, `eval`) appears in it as a regular expression, and the scanner cannot tell a pattern definition from a pattern use. This package never executes scanned code, never spawns a shell, and its only outbound request is the optional OSV lookup at `api.osv.dev` performed by the supply-chain check.
+
 ### v1.3 - Baselines & reports
 
 After a fix, prove the risk is gone — and that nothing new appeared:

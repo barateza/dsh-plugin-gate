@@ -3,6 +3,23 @@
 All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate` 1.3.2
 (2026-09-11); entries below are relative to that release.
 
+## 1.3.4 — 2026-11-05
+
+### Documentation
+
+- README / README.zh: explain why `gate_scan` on this package itself returns **BLOCK** —
+  `lib/rules.js` *is* the signature catalogue, so the patterns it hunts for appear in it as
+  regular expressions, and the scanner cannot tell a definition from a use. The note also
+  states what the package does not do (it never executes scanned code, never spawns a shell;
+  its only outbound request is the optional OSV lookup at `api.osv.dev`).
+
+### Release engineering
+
+- First release published by CI through npm **trusted publishing** (OIDC), with a provenance
+  statement: no npm token exists anywhere. 1.3.3 had been bootstrapped with `npm stage publish`
+  plus a manual approval, because a trusted publisher cannot be attached to a package that does
+  not exist yet.
+
 ## 1.3.3 — 2026-11-05
 
 ### Fixed
