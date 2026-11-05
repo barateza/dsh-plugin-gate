@@ -3,6 +3,30 @@
 All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate` 1.3.2
 (2026-09-11); entries below are relative to that release.
 
+## 1.3.5 — 2026-11-05
+
+### Fixed
+
+- **A self-scan no longer BLOCKs the gate itself.** `gate_scan` of this package returned
+  **BLOCK** because `lib/rules.js` *is* the signature catalogue and the tool descriptions and
+  docs quote the same patterns; the verdict told every agent following the gate's own guidance
+  to refuse the gate. A scan whose target package name is the gate's own
+  (`dsh-plugin-gate` / `@barateza/dsh-plugin-gate`) now caps the verdict at **WARN**, sets
+  `selfScan: true`, and keeps every finding visible with an explicit note. The cap is keyed on
+  the package name, which only the gate can publish: the same content under any other name
+  still returns **BLOCK**. Local-directory and tarball scans now report `package.name`, so the
+  cap applies to `gate_scan` targets of every kind, not just npm specs.
+
+### Changed
+
+- Peer metadata widened from `^0.1.0-rc.6` to `>=0.1.0-rc.6 <0.3.0` for
+  `@deepseek-ai/dsh-fs`, `@deepseek-ai/dsh-system-prompt` and `@deepseek-ai/dsh-tools`. The
+  old ranges were 0.1.x-only and excluded 0.2.x, including the 0.2.2 line.
+- All five DSH host packages are now `peerDependenciesMeta.optional`. DeepSeek Harness
+  resolves them at load time from its own installation rather than installing them into the
+  profile, so declaring them as required peers only produced missing-peer warnings on install.
+  `pnpm install` of this package no longer reports peer issues.
+
 ## 1.3.4 — 2026-11-05
 
 ### Documentation
