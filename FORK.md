@@ -54,6 +54,14 @@ This is a low-volume fork, not a re-launch of the project:
   declared in `engines.dsh` and raised only after the suite passes on that runtime.
 - **If the window is not re-verified, the package is deprecated rather than left silently
   stale.** A security scanner that quietly misses detections is worse than no scanner.
+- **Releases are cut by pushing a `v*` tag.** `.github/workflows/publish.yml` publishes through
+  npm **trusted publishing** (OIDC): no npm token exists in this repository, in GitHub secrets,
+  or on any machine, and the workflow fails closed if the OIDC exchange is not authorized. The
+  workflow also attaches a provenance statement. Node 24 / npm >= 11.5.1 are required.
+- **The first release was bootstrapped through staged publishing**, not a bypass-2FA token:
+  `npm stage publish` (which needs no 2FA) plus an approval on npmjs.com with a security key.
+  A trusted publisher cannot be attached to a package that does not exist yet, so exactly one
+  release had to be approved by hand.
 - **Security tool caveat, unchanged from upstream** ([SECURITY.md](./SECURITY.md)): this is a
   heuristic scanner. It can miss novel malware and can over-flag innocent code. A `PASS` is
   not a guarantee.

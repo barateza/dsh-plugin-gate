@@ -1,23 +1,44 @@
 name: publish
 
+# Trusted publishing (OIDC). No npm token is stored in this repository, in
+# secrets, or on any machine: the workflow exchanges a short-lived GitHub
+# Actions OIDC token for a short-lived npm publish credential, and only THIS
+# workflow file in THIS repository is authorized to do so (configured on the
+# package's "Trusted Publisher" settings on npmjs.com).
+#
+# Requires npm >= 11.5.1 (Node 24 ships it; the step below upgrades anyway) and
+# the `id-token: write` permission. The package must already exist — the first
+# release (1.3.3) was bootstrapped with `npm stage publish` plus a manual
+# approval, because a trusted publisher cannot be configured for a package that
+# does not exist yet. Every release after that needs no credential at all.
+
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # required for OIDC
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
-      - run: npm ci
-      - run: node --test test/
-      - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          package-manager-cache: false
+
+      - name: Ensure npm supports trusted publishing (>= 11.5.1)
+        run: npm install -g npm@latest && npm --version
+
+      # `npm install`, not `npm ci`: no lockfile is tracked (see test.yml).
+      - run: npm install
+
+      - run: npm test
+
+      - run: npm publish --access public --provenance
