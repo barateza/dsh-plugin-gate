@@ -1,12 +1,14 @@
 # Security Policy
 
-dsh-plugin-gate is a heuristic scanner, not a formal antivirus or a
-substitute for code review. It raises warnings from signature patterns and
-can both miss novel malware and over-flag innocent code.
+This is the **unofficial maintained fork** `@barateza/dsh-plugin-gate`
+(<https://github.com/barateza/dsh-plugin-gate>). dsh-plugin-gate is a heuristic
+scanner, not a formal antivirus or a substitute for code review. It raises
+warnings from signature patterns and can both miss novel malware and over-flag
+innocent code.
 
 ## Reporting a vulnerability
 
-Open an issue at https://github.com/863683348/dsh-plugin-gate/issues with the
+Open an issue at https://github.com/barateza/dsh-plugin-gate/issues with the
 subject prefixed `[security]`. Do not include secrets or full malicious
 payloads in the public issue; describe the pattern and, if needed, reach out
 for a private channel.

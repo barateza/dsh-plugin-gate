@@ -1,7 +1,7 @@
 {
-  "name": "dsh-plugin-gate",
-  "version": "1.3.2",
-  "description": "Installation safety gate & data-protection guard for DeepSeek Harness: 60 static signature rules scan plugin sources for malicious install scripts, credential theft, obfuscation and network callbacks before 'dsh plugin add', with scan baselines (gate_diff), structured reports (gate_report), 12 destructive-command patterns and workspace-boundary checks.",
+  "name": "@barateza/dsh-plugin-gate",
+  "version": "1.3.3",
+  "description": "Unofficial maintained fork of dsh-plugin-gate. Installation safety gate & data-protection guard for DeepSeek Harness: 60 static signature rules scan plugin sources for malicious install scripts, credential theft, obfuscation and network callbacks before 'dsh plugin add', with scan baselines (gate_diff), structured reports (gate_report), 12 destructive-command patterns and workspace-boundary checks. Carries the gate_guard parameter fix and gate_report lossless-JSON fix that never landed upstream (dsh-plugin-gate/issues/5).",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -17,11 +17,13 @@
     "README.md",
     "README.zh.md",
     "SECURITY.md",
-    "ROADMAP.md"
+    "ROADMAP.md",
+    "CHANGELOG.md",
+    "FORK.md"
   ],
   "scripts": {
-    "test": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs",
-    "prepublishOnly": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs"
+    "test": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs && node test/gate-guard.test.mjs && node test/gate-report.test.mjs",
+    "prepublishOnly": "node test/baseline.test.mjs && node test/osv.test.mjs && node test/protect.test.mjs && node test/report.test.mjs && node test/rules.test.mjs && node test/scan.test.mjs && node test/gate-guard.test.mjs && node test/gate-report.test.mjs"
   },
   "keywords": [
     "deepseek-harness",
@@ -35,9 +37,13 @@
     "malware",
     "supply-chain",
     "gate",
-    "safety"
+    "safety",
+    "fork"
   ],
   "license": "MIT",
+  "engines": {
+    "dsh": ">=0.2.0-rc.2 <0.3.0"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -52,11 +58,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/863683348/dsh-plugin-gate.git"
+    "url": "git+https://github.com/barateza/dsh-plugin-gate.git"
   },
-  "homepage": "https://github.com/863683348/dsh-plugin-gate#readme",
+  "homepage": "https://github.com/barateza/dsh-plugin-gate#readme",
   "bugs": {
-    "url": "https://github.com/863683348/dsh-plugin-gate/issues"
+    "url": "https://github.com/barateza/dsh-plugin-gate/issues"
   },
   "publishConfig": {
     "access": "public"

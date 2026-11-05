@@ -1,4 +1,5 @@
-# dsh-plugin-gate — bundle patch layer.
+# dsh-plugin-gate — bundle patch layer. Fork: the row specifier must equal the
+# package.json `name`, so it is the scoped fork name, not the upstream one.
 #
 # Profile-bundle patches compose over an EMPTY entry list (launcher
 # composition), so this patch is an `insert` appending one composition row.
@@ -8,7 +9,7 @@
 # row below (the `gate` entry) to that preset's `agent.cordis.yml`.
 - insert:
     - id: gate
-      name: 'dsh-plugin-gate'
+      name: '@barateza/dsh-plugin-gate'
       config:
         maxFiles: 1000
         maxFileBytes: 2097152

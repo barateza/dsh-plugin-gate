@@ -13,6 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          # No `cache: npm`: it requires package-lock.json / npm-shrinkwrap.json,
+          # and neither is tracked here — the step failed with "Dependencies lock
+          # file is not found" before any test ran. Restore it together with a
+          # committed lockfile if you want npm's download cache back.
+      # `npm install`, not `npm ci`: `npm ci` also requires a lockfile and exits
+      # with EUSAGE without one. Switch back to `npm ci` once a lockfile is
+      # tracked — it is stricter and faster.
+      - run: npm install
       - run: node --test test/

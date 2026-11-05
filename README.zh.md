@@ -1,5 +1,7 @@
 # dsh-plugin-gate（安装安全闸门）
 
+> **非官方维护分支**：本包是 [`863683348/dsh-plugin-gate`](https://github.com/863683348/dsh-plugin-gate) 的 fork，发布为 [`@barateza/dsh-plugin-gate`](https://www.npmjs.com/package/@barateza/dsh-plugin-gate)。上游自 2026 年 9 月起未回复任何 issue 或 PR，因此本分支带上两处未能合入上游的修复：`gate_guard` 此前永远无法返回 `BLOCK` / `PASS`（参数声明在嵌套的 `input` 下，而 `execute` 读取的是扁平参数），以及 `gate_report` 在未带 `write: true` 时每次调用都失败（`undefined` 被无损 JSON 校验拒绝）。完整差异、已测试的 harness 版本范围与维护策略见 [FORK.md](./FORK.md)。
+
 **DeepSeek Harness 插件的安装安全闸门与数据保护闸 —— 在 `dsh plugin add` 之前，用 60 条静态签名规则（31 高危 / 24 中危 / 5 低危）扫描插件源码中的恶意安装脚本、凭据窃取、混淆与外传行为；并以 12 种危险命令模式与工作区边界检查，在 `rm -rf` 一类误删事故发生前将其拦截。**
 
 插件市场膨胀迅速（数千条目），恶意代码混入插件只是时间问题。本插件为 agent 提供 `gate_scan` 工具，可扫描插件源码——**本地目录**或 **npm tarball**——检测经典恶意代码形态：
@@ -18,7 +20,7 @@
 ## 安装
 
 ```bash
-dsh plugin --profile <profile> add dsh-plugin-gate
+dsh plugin --profile <profile> add @barateza/dsh-plugin-gate
 ```
 
 ## 使用

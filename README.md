@@ -1,5 +1,7 @@
 # dsh-plugin-gate
 
+> **Unofficial maintained fork** of [`863683348/dsh-plugin-gate`](https://github.com/863683348/dsh-plugin-gate), published as [`@barateza/dsh-plugin-gate`](https://www.npmjs.com/package/@barateza/dsh-plugin-gate). Upstream has not answered issues or pull requests since September 2026, so this fork carries the two fixes that never landed there: `gate_guard` could never return `BLOCK` or `PASS` (declared under a nested `input` while `execute` read flat arguments), and `gate_report` failed on every call without `write: true` (`undefined` rejected by the lossless-JSON validator). See [FORK.md](./FORK.md) for the full delta, the tested harness range and the maintenance policy.
+
 **Installation safety gate & data-protection guard for DeepSeek Harness — 60 static signature rules (31 high / 24 medium / 5 low) scan plugin sources for malicious install scripts, credential theft, obfuscation and network callbacks before you run `dsh plugin add`, and 12 destructive-command patterns plus workspace-boundary checks stop `rm -rf`-class accidents before they happen.**
 
 The plugin marketplace is growing fast (thousands of entries), and malicious code mixed into a plugin is only a matter of time. `dsh-plugin-gate` gives the agent a `gate_scan` tool that inspects a plugin source — a **local directory** or an **npm tarball** — for the classic malware shapes:
@@ -24,9 +26,9 @@ Tool schemas are validated against the `@deepseek-ai/dsh-tools` value-schema DSL
 In your DSH profile:
 
 ```bash
-dsh plugin --profile <profile> add dsh-plugin-gate
+dsh plugin --profile <profile> add @barateza/dsh-plugin-gate
 # or add the bundle patch manually:
-#   dsh --profile <profile> --patch ./node_modules/dsh-plugin-gate/cordis.patch.yml
+#   dsh --profile <profile> --patch ./node_modules/@barateza/dsh-plugin-gate/cordis.patch.yml
 ```
 
 ## Usage
