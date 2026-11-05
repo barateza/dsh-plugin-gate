@@ -49,15 +49,16 @@ Two of those defects made the safety features inert:
   `lib/rules.js` necessarily matches its own rules, so the previous BLOCK told every agent
   following the gate's guidance to refuse the gate. Findings stay visible; the same content
   under any other package name still BLOCKs.
-- `chore(peers)`: widen `@deepseek-ai/dsh-fs`, `@deepseek-ai/dsh-system-prompt` and
-  `@deepseek-ai/dsh-tools` from `^0.1.0-rc.6` to `>=0.1.0-rc.6 <0.3.0`, and mark the five DSH
-  host packages `peerDependenciesMeta.optional` — the harness provides them at load time, so
-  declaring them required only produced missing-peer warnings on install.
-
 - `fix(tarball-url)`: validate `dist.tarball` before fetching it — https only, host must be in
   `allowedTarballHosts` (default `registry.npmjs.org`), and loopback/link-local/private/CGNAT/
   multicast/ULA addresses are refused, including via a redirect. The URL comes from registry
   metadata, so this closes an SSRF surface in the npm-spec scan path.
+- `revert(peers)`: an attempt to widen the DSH peer ranges and mark them `optional` was backed
+  out. Optional peers stop `npm install` from fetching them, which broke the suite
+  (`lib/index.js` imports `@deepseek-ai/schemastery`), and npm's semver never matched the
+  `0.2.2-rc.1` prerelease against `>=0.1.0-rc.6 <0.3.0` anyway — it kept resolving `0.1.0-rc.8`.
+  Peers are upstream's; the two packages the entry imports are explicit devDependencies so a
+  clean checkout can run the tests. `engines.dsh` is the compatibility contract.
 
 Everything else — rules, report renderer, roadmap — is upstream's, unchanged; the scanner
 gained only the self-scan cap and the tarball-URL check described above.

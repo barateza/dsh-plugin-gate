@@ -3,7 +3,10 @@
 All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate` 1.3.2
 (2026-09-11); entries below are relative to that release.
 
-## 1.3.6 — 2026-11-05
+## 1.3.7 — 2026-11-05
+
+_Tagged once as 1.3.6; that tag never published — CI failed on the peer-metadata regression below
+before anything was staged, so no artifact exists for it. The fixes here are unchanged by that._
 
 ### Security
 
@@ -22,6 +25,27 @@ All notable changes to this fork. The fork starts from upstream `dsh-plugin-gate
   `allowedTarballHosts` is a scan option, not plugin config, so a mirror can be permitted
   deliberately. Private-registry scanning still does not work — the metadata lookup is pinned to
   `registry.npmjs.org` — and is tracked separately rather than silently half-enabled.
+
+### Fixed
+
+- **Reverted the 1.3.5 peer-metadata change; it made the package uninstallable for its own
+  toolchain.** 1.3.5 marked the five DSH host packages `peerDependenciesMeta.optional` to silence
+  pnpm's missing-peer warning. With optional peers, npm stops installing them, and `npm test`
+  then died at `lib/index.js` importing `@deepseek-ai/schemastery` (`ERR_MODULE_NOT_FOUND`). CI
+  caught this on the 1.3.6 tag — both the `test` and `publish` jobs failed before staging — which
+  is why 1.3.6 was never released.
+
+  The peer ranges are back to upstream's, and the two host packages the plugin entry actually
+  imports (`@deepseek-ai/schemastery`, `@deepseek-ai/dsh-tools`) are now explicit
+  `devDependencies` so a clean checkout can run the suite.
+
+  The widened range from 1.3.5 was also wrong on its own terms: npm's semver does not match the
+  `0.2.2-rc.1` prerelease against `>=0.1.0-rc.6 <0.3.0` (prereleases are only admitted for the
+  same `major.minor.patch` as a comparator), so it resolved the old `0.1.0-rc.8` line regardless.
+  The range bought nothing and created a resolution split. DeepSeek Harness ignores peer ranges
+  when `engines.dsh` is declared, which it is — so `engines.dsh` remains the compatibility
+  contract, and the missing-peer warning stays ecosystem-wide noise rather than something this
+  package should trade installability for.
 
 ## 1.3.5 — 2026-11-05
 
